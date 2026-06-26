@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機漢字產生器</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-hover: #357abd;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #dddddd;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .output-box {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 18px;
+            line-height: 1.6;
+            resize: none;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            margin-bottom: 15px;
+            text-align: left;
+            word-break: break-all;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .copy-btn {
+            background-color: #2ecc71;
+        }
+        .copy-btn:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>隨機漢字產生器</h1>
+    
+    <div class="controls">
+        <label for="charCount">產生字數：</label>
+        <input type="number" id="charCount" value="50" min="1" max="1000">
+        <button onclick="generateText()">開始產生</button>
+    </div>
+
+    <textarea id="output" class="output-box" readonly placeholder="產生的隨機漢字會顯示在這裡..."></textarea>
+
+    <div class="btn-group">
+        <button class="copy-btn" onclick="copyText()">複製文字</button>
+    </div>
+</div>
+
+<script>
+    function generateText() {
+        const countInput = document.getElementById('charCount');
+        let count = parseInt(countInput.value);
+        
+        // 安全限制
+        if (isNaN(count) || count < 1) count = 50;
+        if (count > 100000) count = 100000;
+
+        // Unicode 基本漢字核心區區間：4E00 到 9FFF
+        const startCode = 0x4E00;
+        const endCode = 0x9FFF;
+        const range = endCode - startCode + 1;
+
+        let result = '';
+        for (let i = 0; i < count; i++) {
+            // 在區間內隨機取一個十進位數字
+            const randomCode = Math.floor(Math.random() * range) + startCode;
+            // 將數字轉換回漢字字元
+            result += String.fromCharCode(randomCode);
+        }
+
+        document.getElementById('output').value = result;
+    }
+
+    function copyText() {
+        const outputText = document.getElementById('output');
+        if (!outputText.value) {
+            alert('請先產生文字！');
+            return;
+        }
+        
+        outputText.select();
+        outputText.setSelectionRange(0, 99999); // 行動裝置相容
+        
+        try {
+            navigator.clipboard.writeText(outputText.value);
+            alert('文字已成功複製！');
+        } catch (err) {
+            // 備用複製方案
+            document.execCommand('copy');
+            alert('文字已成功複製！');
+        }
+    }
+
+    // 網頁載入時自動先產生一次
+    window.onload = generateText;
+</script>
+
+</body>
+</html>
